@@ -11,11 +11,14 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,7 +26,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.skt.Tmap.TMapData;
 import com.skt.Tmap.TMapGpsManager;
+import com.skt.Tmap.TMapPoint;
+import com.skt.Tmap.TMapPolyLine;
 import com.skt.Tmap.TMapView;
 
 import java.io.IOException;
@@ -62,8 +68,8 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     private BluetoothAdapter bluetoothAdapter;
     final int REQUEST_ENABLE_BT=1;
     // Initializes Bluetooth adapter.
-    final BluetoothManager bluetoothManager =
-            (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+//    final BluetoothManager bluetoothManager =
+//            (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 
     // T Map View
     TMapView tMapView = null;
@@ -134,33 +140,54 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         tMapView.setSKTMapApiKey(API_Key);
 
         // Initial Setting
-        tMapView.setZoomLevel(17);
+        tMapView.setZoomLevel(15);
         tMapView.setIconVisibility(true);
         tMapView.setMapType(TMapView.MAPTYPE_STANDARD);
         tMapView.setLanguage(TMapView.LANGUAGE_KOREAN);
-
         // T Map View Using Linear Layout
         LinearLayout linearLayoutTmap = (LinearLayout)findViewById(R.id.linearLayoutTmap);
+
         linearLayoutTmap.addView(tMapView);
-
+        FindPath findPath = new FindPath();
+        findPath.execute();
         // Request For GPS permission
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-        }
-
-        // GPS using T Map
-        tMapGPS = new TMapGpsManager(this);
-
-        // Initial Setting
-        tMapGPS.setMinTime(1000);
-        tMapGPS.setMinDistance(10);
-        tMapGPS.setProvider(tMapGPS.NETWORK_PROVIDER);
-        //tMapGPS.setProvider(tMapGPS.GPS_PROVIDER);
-
-        tMapGPS.OpenGps();
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//            requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+//        }
+//
+//        // GPS using T Map
+//        tMapGPS = new TMapGpsManager(this);
+//
+//        // Initial Setting
+//        tMapGPS.setMinTime(1000);
+//        tMapGPS.setMinDistance(10);
+//        tMapGPS.setProvider(tMapGPS.NETWORK_PROVIDER);
+////        tMapGPS.setProvider(tMapGPS.GPS_PROVIDER);
+//
+//        tMapGPS.OpenGps();
 
     }
 
+
+    public class FindPath extends AsyncTask{
+
+        @Override
+        protected Object doInBackground(Object[] objects) {
+            Log.d("디버그","디버그");
+            TMapPoint tMapPointStart = new TMapPoint(37.570841, 126.985302); // SKT타워(출발지)
+            TMapPoint tMapPointEnd = new TMapPoint(37.551135, 126.988205); // N서울타워(목적지)
+            try {
+                TMapPolyLine tMapPolyLine = new TMapData().findPathData(tMapPointStart, tMapPointEnd);
+                tMapPolyLine.setLineColor(Color.BLUE);
+                tMapPolyLine.setLineWidth(2);
+
+                tMapView.addTMapPolyLine("Line1", tMapPolyLine);
+            }catch(Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
     @Override
     public void onLocationChange(Location location) {
         tMapView.setLocationPoint(location.getLongitude(), location.getLatitude());

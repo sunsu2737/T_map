@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         tMapView.setSKTMapApiKey(API_Key);
 
         // Initial Setting
-        tMapView.setZoomLevel(15);
+        tMapView.setZoomLevel(13);
         tMapView.setIconVisibility(true);
         tMapView.setMapType(TMapView.MAPTYPE_STANDARD);
         tMapView.setLanguage(TMapView.LANGUAGE_KOREAN);
@@ -149,33 +149,35 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
 
         linearLayoutTmap.addView(tMapView);
         FindPath findPath = new FindPath();
-        findPath.execute();
-        // Request For GPS permission
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-//            requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-//        }
-//
-//        // GPS using T Map
-//        tMapGPS = new TMapGpsManager(this);
-//
-//        // Initial Setting
-//        tMapGPS.setMinTime(1000);
-//        tMapGPS.setMinDistance(10);
-//        tMapGPS.setProvider(tMapGPS.NETWORK_PROVIDER);
-////        tMapGPS.setProvider(tMapGPS.GPS_PROVIDER);
-//
-//        tMapGPS.OpenGps();
+//         Request For GPS permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+
+        // GPS using T Map
+        tMapGPS = new TMapGpsManager(this);
+
+        // Initial Setting
+        tMapGPS.setMinTime(1000);
+        tMapGPS.setMinDistance(10);
+        tMapGPS.setProvider(tMapGPS.NETWORK_PROVIDER);
+//        tMapGPS.setProvider(tMapGPS.GPS_PROVIDER);
+        tMapGPS.OpenGps();
+        tMapView.setTrackingMode(true);
+        tMapView.setSightVisible(true);
+
+        findPath.execute(37.570841,126.985302,37.551135,126.988205);
 
     }
 
 
-    public class FindPath extends AsyncTask{
+    public class FindPath extends AsyncTask<Double,Double,Double>{
 
         @Override
-        protected Object doInBackground(Object[] objects) {
-            Log.d("디버그","디버그");
-            TMapPoint tMapPointStart = new TMapPoint(37.570841, 126.985302); // SKT타워(출발지)
-            TMapPoint tMapPointEnd = new TMapPoint(37.551135, 126.988205); // N서울타워(목적지)
+        protected Double doInBackground(Double ... objects) {
+//            Log.d("디버그","디버그");
+            TMapPoint tMapPointStart = new TMapPoint(objects[0], objects[1]); // (출발지)
+            TMapPoint tMapPointEnd = new TMapPoint(objects[2], objects[3]); // (목적지)
             try {
                 TMapPolyLine tMapPolyLine = new TMapData().findPathData(tMapPointStart, tMapPointEnd);
                 tMapPolyLine.setLineColor(Color.BLUE);
@@ -193,6 +195,49 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         tMapView.setLocationPoint(location.getLongitude(), location.getLatitude());
         tMapView.setCenterPoint(location.getLongitude(), location.getLatitude());
     }
+    public class MapPoint {
+        private String Name;
+        private double latitude;
+        private double longitude;
+
+        public MapPoint(){
+            super();
+        }
+
+        public MapPoint(String Name, double latitude, double longitude) {
+            //super();
+            this.Name = Name;
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+
+
+        public String getName() {
+            return Name;
+        }
+
+        public void setName(String Name) {
+            this.Name = Name;
+        }
+
+        public double getLatitude() {
+            return latitude;
+        }
+
+        public void setLatitude(double latitude) {
+            this.latitude = latitude;
+        }
+
+        public double getLongitude() {
+            return longitude;
+        }
+
+        public void setLongitude(double longitude) {
+            this.longitude = longitude;
+        }
+    }
+
+
     void bluetoothOn() {
         if(mBluetoothAdapter == null) {
             Toast.makeText(getApplicationContext(), "블루투스를 지원하지 않는 기기입니다.", Toast.LENGTH_LONG).show();

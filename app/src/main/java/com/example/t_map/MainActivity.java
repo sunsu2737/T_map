@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements TMapGpsManager.onLocationChangedCallback {
+    //블루투스관련 변수들
     TextView mTvBluetoothStatus;
     TextView mTvReceiveData;
     TextView mTvSendData;
@@ -67,9 +68,6 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
     String API_Key = "l7xx578cbd3e78534b7bb092284efab71307";
     private BluetoothAdapter bluetoothAdapter;
     final int REQUEST_ENABLE_BT=1;
-    // Initializes Bluetooth adapter.
-//    final BluetoothManager bluetoothManager =
-//            (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 
     // T Map View
     TMapView tMapView = null;
@@ -89,28 +87,31 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         mBtnBluetoothOff = (Button)findViewById(R.id.btnBluetoothOff);
         mBtnConnect = (Button)findViewById(R.id.btnConnect);
         mBtnSendData = (Button)findViewById(R.id.btnSendData);
-
+        //블루투스 어뎁터 설정
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-
+        //블루투스 켜기
         mBtnBluetoothOn.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
                 bluetoothOn();
             }
         });
+        //블루투스 끄기
         mBtnBluetoothOff.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
                 bluetoothOff();
             }
         });
+        //페어링된 블루투스 기기 조회 및 연결
         mBtnConnect.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
                 listPairedDevices();
             }
         });
+        //블루투스 데이터 전송
         mBtnSendData.setOnClickListener(new Button.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -133,13 +134,13 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
                 }
             }
         };
-        // T Map View
+        // T Map 뷰
         tMapView = new TMapView(this);
 
         // API Key
         tMapView.setSKTMapApiKey(API_Key);
 
-        // Initial Setting
+        // 초기 세
         tMapView.setZoomLevel(13);
         tMapView.setIconVisibility(true);
         tMapView.setMapType(TMapView.MAPTYPE_STANDARD);
@@ -148,16 +149,17 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         LinearLayout linearLayoutTmap = (LinearLayout)findViewById(R.id.linearLayoutTmap);
 
         linearLayoutTmap.addView(tMapView);
+        //길찾기를 수행할 비동기클래스
         FindPath findPath = new FindPath();
-//         Request For GPS permission
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
 
-        // GPS using T Map
+        // GPS
         tMapGPS = new TMapGpsManager(this);
 
-        // Initial Setting
+        // GPS 초기 세팅
         tMapGPS.setMinTime(1000);
         tMapGPS.setMinDistance(10);
         tMapGPS.setProvider(tMapGPS.NETWORK_PROVIDER);
@@ -165,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements TMapGpsManager.on
         tMapGPS.OpenGps();
         tMapView.setTrackingMode(true);
         tMapView.setSightVisible(true);
-
+        //길찾기 수행
         findPath.execute(37.570841,126.985302,37.551135,126.988205);
 
     }
